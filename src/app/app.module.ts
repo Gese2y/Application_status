@@ -28,9 +28,12 @@ import { LoadingBarComponent } from './loading-bar/loading-bar.component';
 import { LoadingBarInterceptor } from './loading-bar/loading-bar-interceptor';
 import { LoadingBarService } from './loading-bar/loading-bar.service';
 import { DatepickerEthiopianDirective } from './datepicker-ethiopian.directive';
+
 // import { UserRegistrationComponent } from './user-registration/user-registration.component';
 import { NgxCaptureModule } from 'ngx-capture';
 import { ApplicationStatusComponent } from './application-status/application-status.component';
+import { ProcessedApplicationComponent } from './processed-application/processed-application.component';
+import { RejectedApplicationComponent } from './rejected-application/rejected-application.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +43,9 @@ import { ApplicationStatusComponent } from './application-status/application-sta
     LoadingBarComponent,
     DatepickerEthiopianDirective,
     // UserRegistrationComponent,
-    ApplicationStatusComponent
+    ApplicationStatusComponent,
+    ProcessedApplicationComponent,
+    RejectedApplicationComponent
     
   ],
   imports: [
@@ -50,6 +55,7 @@ import { ApplicationStatusComponent } from './application-status/application-sta
     SimpleNotificationsModule.forRoot(),
     TabsModule.forRoot(),
     FileUploadModule,
+    TabViewModule ,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,

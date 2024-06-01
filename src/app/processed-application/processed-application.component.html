@@ -1,0 +1,389 @@
+
+<app-loading-bar *ngIf="loadingBarService.loadingBarSubject | async"></app-loading-bar>
+<div #screen  style="width: 100%; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);"  [style.zoom]="defaultZoomLevel" >
+  
+    <div class="card-header card-title" style="text-align: center; font-weight: bold;">
+      <!-- <img width="100px" height="100px" src="{{Logo}}" /> -->
+      <h4 class="card-title" style="text-align: center;font-weight: bold;" translate>Processed Application Status Report </h4>
+    </div>
+    <div><div>    <div>
+        <br> 
+        <form class="row gx-3 gy-2 align-items-center">
+          <div class="col-sm-3">
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="Form.subcity" name="Subciy" id="Subciy" (change)="passSubcity($event.target.value)">
+                <ng-container *ngFor="let Org of organization">
+                  <option [value]="Org.organization_code">
+                    {{ language === 'amharic' ? Org.name_am : Org.name_am }}
+                  </option>
+                </ng-container>
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="input-group">
+              <select #selectElement (change)="passSelectBy($event.target.value)" class="form-select custom2-select2 " id="inputGroupSelect03" aria-label="Example select with button addon">
+                <option selected value="app">By Application</option>
+                <option value="user">By Customer</option>
+                <option value="reco">By Record No</option>
+              </select>
+              <input class="form-control custom-input" placeholder="search here" name="UserId" id="UserId" [disabled]="Form.active" [(ngModel)]="Form.applictaion_Number">
+            </div>
+          </div>
+          <div style="max-width: 150px; display: flex; align-items: center;">
+            <input style="width: 30px; margin-left: 10px;" type="checkbox" class="form-control" placeholder="application Number" name="check" id="check" (click)="check()" [(ngModel)]="Form.active" [checked]="true">
+            &nbsp;<span>NULL</span>
+          </div>
+          <div class="col-sm-3">
+            <button type="button" (click)="getApplicatStatus()" class="btn btn-primary">View Report</button>
+          </div>
+          <div  style="text-align: right;">
+  &nbsp; <div ngbDropdown class="d-inline-block">
+    <button class="btn btn-warning" style="background-color: rgb(37, 37, 152);color: white;" id="mainDropdown" ngbDropdownToggle>
+      <i class="bi bi-filetype-pdf"></i>PDF</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <div ngbDropdownMenu aria-labelledby="mainDropdown">
+      <button type="button" [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportToPDFAll()">All</button>
+      <button type="button" class="dropdown-item" (click)="exportToPDF()">Current Application</button>
+      <!-- <div ngbDropdown #subDropdown="ngbDropdown">
+        <button class="dropdown-item dropdown-toggle" (mouseenter)="subDropdown.open()">Excel</button>
+        <div ngbDropdownMenu (mouseleave)="subDropdown.close()">
+          <button [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportSingle()">Current Application</button>
+          <button [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportAll()">All Application</button>
+        </div>
+      </div> -->
+    </div>
+  </div>
+  <div ngbDropdown class="d-inline-block">
+    <button type="button" class="btn btn-warning" style="background-color: green;color: white;" id="mainDropdown" ngbDropdownToggle>
+      <!-- <i class="pi pi-file-excel" style="color: rgb(211, 208, 225)"></i> -->
+      <i class="bi bi-file-earmark-excel"></i>Excel</button>
+    <div ngbDropdownMenu aria-labelledby="mainDropdown">
+      <button type="button" [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportAll()">All</button>
+      <button type="button" class="dropdown-item" (click)="exportToExcel()">Current Application</button>
+      <!-- <div ngbDropdown #subDropdown="ngbDropdown">
+        <button class="dropdown-item dropdown-toggle" (mouseenter)="subDropdown.open()">Excel</button>
+        <div ngbDropdownMenu (mouseleave)="subDropdown.close()">
+          <button [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportSingle()">Current Application</button>
+          <button [style.color]="'green'" [style.background-color]="'lightblue'"  class="dropdown-item" (click)="exportAll()">All Application</button>
+        </div>
+      </div> -->
+    </div>
+  </div>
+  
+  
+  
+  
+          </div>
+        </form>
+        <br>
+      </div>
+      <div style="overflow-x: auto;">
+        <div class="process-info" *ngIf="!isHere">
+          <div class="process-header">
+            <h3 class="application-title">Application Details</h3>
+          </div>
+          <div class="process-body">
+            <div class="application-details">
+              <p><strong>Application Number:</strong> {{checkAppOrg[0].application_number}}</p>
+              <p><strong>Processed On:</strong> {{checkAppOrg[0].organizationname}}</p>
+            </div>
+            <div class="additional-info">
+              <p>This application was reviewed and processed by <strong>{{checkAppOrg[0].organizationname}}</strong>, ensuring that all compliance and regulatory standards were met.</p>
+              <p>If you have any questions regarding this application, please contact the organization directly for more detailed information.</p>
+            </div>
+            <button type="button" class="btn btn-warning" (click)="showMore()">show more</button>
+          </div>
+        </div>
+        
+      </div>
+      <table *ngIf="isHere" id="data-table" #dataTable style="overflow: auto; border: 2px solid black;" class="table text-center table-bordered">
+        
+    <thead style="background-color: #ADD8E6; color: black; font-weight: bold;">
+              <tr>
+                <th  colspan="2"  translate>Step</th>
+            <!-- <th  class="task-column" translate>Task</th> -->
+            <th  translate >Role Name</th>
+            <th  translate hidden="hideUserName">User Name</th>
+            <th  translate>Status</th>
+            <th  translate>Start Date</th>
+            <th  translate>End Date</th>
+            <th  translate>Estimated minute</th>
+            <th  translate>Finshed with in minute of</th>
+            <th  translate>Minutes late</th>
+            <th  translate>First Name en</th>
+            <th  translate>First Name Local</th>
+            <th  translate>Last Name en</th>
+            <th  translate>Last Name Local</th>
+            <th  translate>Middle Name en</th>
+            <th  translate>Middle Name Local</th>
+            <th  translate>Massage</th>
+            <!-- <th scope="col" translate>Email</th> -->
+              </tr>
+            </thead>
+            <tbody *ngIf="noRecord">
+
+              <tr >
+                <td colspan="16" class="header-table-message" style="margin-left: 500px">
+                  <span class="pi pi-info-circle header-table-message-icon"></span>
+                  <span class="header-table-message-text">No record!</span>
+                </td>
+              </tr> 
+            </tbody>
+            <tbody *ngIf="!noRecord">
+              <tr>
+              </tr>
+  
+              <ng-container *ngFor="let recordf of paginatedUsers">
+                <tr style="background-color: #C0C0C0; color: white; font-weight: bold;">
+                    <td colspan="2" class="task-column" style="font-weight: bold; text-align: center;">
+                      <p class="description">{{ recordf.servD }}</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr style="background-color:#D3D3D3; color: white; font-weight: bold;">
+                    <td colspan="2" class="task-column" style="font-weight: bold; text-align: center;">
+                      <p class="description">{{ recordf.servName }}</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                <tr >
+                    <td colspan="17" style="font-weight: bold; text-align: left; background-color: #B0C4DE;">
+                      <h4>{{ recordf.applicationNumber }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn" style="background-color: rgba(19, 178, 75, 0.886);color: white;" (click)="displayAllMessage(recordf.applicationNumber)">
+                         show All Message
+                        </button>
+                      </h4>completed:{{recordf.is_completed}} |
+                      Application Status:{{recordf.application_Status}}|
+                      Record Number:{{recordf.recordNo}}
+                    </td>
+                  </tr>
+                  <tr *ngFor="let record of recordf.records" >
+                    <td translate class="step-column">{{ record.step }}</td>
+                    <td translate class="task-column">{{ record.task_Name }}</td>
+                  <td translate class="date-column">{{ record.roleName }}</td>
+                  <td translate class="date-column" hidden="this.hideUserName">{{ 
+                    record.status === 'Q' ?'' : record.userName  }}</td>
+                  <td translate>{{ record.status }}</td>
+                  <td translate class="date-column">{{ record.start_date }}</td>
+                  <td translate class="date-column">{{ record.end_date }}</td>
+                  <td translate>{{ record.estimated_minute_To_Finsh_This_Tasks }}</td>
+                  <td translate>{{ record.finshed_with_in_minute_of }}</td>
+                  <td translate>{{ record.minutes_late }}</td>
+                  <td translate>{{ record.firstName_en }}</td>
+                  <td translate>{{ record.firstName_Local }}</td>
+                  <td translate>{{ record.lastName_en }}</td>
+                  <td translate>{{ record.lastName_Local }}</td>
+                  <td translate>{{ record.middleName_en }}</td>
+                  <td translate>{{ record.middleName_Local }}</td>
+                  <td translate>
+                    <button type="button" class="btn" style="background-color: rgb(51, 156, 121);color: white;" (click)="displayMessage(record.userName, recordf.applicationNumber,record.to_do_code)">
+                      Message
+                    </button></td>
+                  </tr>
+                  <tr style="background-color: hsl(0, 12%, 97%); color: rgb(14, 12, 12); font-weight: bold;">
+                    <td colspan="16" class="task-column" style="font-weight: bold; text-align: left;">
+                      <p>Total Number Of Applications: <span class="bordered-value">{{ NumberofApp }}</span></p>
+  
+                    </td></tr>
+              </ng-container>
+            </tbody>
+          </table>
+          <div id="pagination" class="pagination-container" >
+            <button type="button" (click)="goToFirstPage()" [disabled]="currentPage === 1" class="pagination-button">
+                <span class="pi pi-angle-double-left"></span>
+              </button>
+              <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1" class="pagination-button">
+                <span class="pi pi-angle-left"></span>
+                Previous
+              </button>
+            
+            <button type="button" *ngFor="let page of pageRange"
+              [ngClass]="{'active': page === currentPage, 'pagination-button': true}" (click)="changePage(page)">
+              {{ page }}
+            </button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages" class="pagination-button">
+                Next
+                <span class="pi pi-angle-right"></span>
+              </button>
+              <button type="button" (click)="goToLastPage()" [disabled]="currentPage === totalPages" class="pagination-button">
+                <span class="pi pi-angle-double-right"></span>
+                
+              </button>
+          </div>
+     
+      </div>
+    </div>
+  </div>
+  <table hidden id="data-table2" #dataTable2 style="width: 100%" class="table col-md-12 text-center table-bordered">
+        
+    <thead style="background-color: #ADD8E6; color: black; font-weight: bold;">
+              <tr>
+                <th  colspan="2"  translate>Step</th>
+            <!-- <th  class="task-column" translate>Task</th> -->
+            <th  translate >Role Name</th>
+            <th  translate >User Name</th>
+            <th  translate>Status</th>
+            <th  translate>Start Date</th>
+            <th  translate>End Date</th>
+            <th  translate>Estimated minute</th>
+            <th  translate>Finshed with in minute of</th>
+            <th  translate>Minutes late</th>
+            <th  translate>First Name en</th>
+            <th  translate>First Name Local</th>
+            <th  translate>Last Name en</th>
+            <th  translate>Last Name Local</th>
+            <th  translate>Middle Name en</th>
+            <th  translate>Middle Name Local</th>
+            <!-- <th scope="col" translate>Email</th> -->
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="noRecord">
+                <td colspan="16" class="header-table-message" style="margin-left: 500px">
+                  <span class="pi pi-info-circle header-table-message-icon"></span>
+                  <span class="header-table-message-text">No record!</span>
+                </td>
+              </tr> 
+              <tr>
+              </tr>
+  
+              <ng-container *ngFor="let recordf of AllApp">
+                <tr style="background-color: #C0C0C0; color: white; font-weight: bold;">
+                    <td colspan="2" class="task-column" style="font-weight: bold; text-align: center;">
+                      <p class="description">{{ recordf.servD }}</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr style="background-color:#D3D3D3; color: white; font-weight: bold;">
+                    <td colspan="2" class="task-column" style="font-weight: bold; text-align: center;">
+                      <p class="description">{{ recordf.servName }}</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                <tr >
+                    <td colspan="16" style="font-weight: bold; text-align: left; background-color: #B0C4DE;">
+                      <h4>{{ recordf.applicationNumber }}</h4>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let record of recordf.records" >
+                    <td translate class="step-column">{{ record.step }}</td>
+                    <td translate class="task-column">{{ record.task_Name }}</td>
+                  <td translate>{{ record.roleName }}</td>
+                  <td translate>{{ 
+                    record.status === 'Q' ?'' : record.userName  }}</td>
+                  <td translate>{{ record.status }}</td>
+                  <td translate>{{ record.start_date }}</td>
+                  <td translate>{{ record.end_date }}</td>
+                  <td translate>{{ record.estimated_minute_To_Finsh_This_Tasks }}</td>
+                  <td translate>{{ record.finshed_with_in_minute_of }}</td>
+                  <td translate>{{ record.minutes_late }}</td>
+                  <td translate>{{ record.firstName_en }}</td>
+                  <td translate>{{ record.firstName_Local }}</td>
+                  <td translate>{{ record.lastName_en }}</td>
+                  <td translate>{{ record.lastName_Local }}</td>
+                  <td translate>{{ record.middleName_en }}</td>
+                  <td translate>{{ record.middleName_Local }}</td>
+                  </tr>
+                
+              </ng-container>
+              <tr style="background-color: hsl(0, 12%, 97%); color: rgb(14, 12, 12); font-weight: bold;">
+                <td colspan="17" class="task-column" style="font-weight: bold; text-align: left;">
+                  <p>Total Number Of Applications: <span class="bordered-value">{{ NumberofApp }}</span></p>
+  
+                </td></tr>
+            </tbody>
+          </table>
+  
+          <p-dialog [style.zoom]="defaultZoomLevel" 
+          [header]="item.username" 
+          [(visible)]="showMessagepoup" 
+          [responsive]="true" 
+          [width]="900" 
+          [minY]="50"
+          [maximizable]="true" 
+          [positionTop]="250" 
+          [contentStyle]="{
+            'overflow-y': 'auto', 
+            'overflow-x': 'hidden', 
+            'max-height': '80vh',
+            'min-height':'250px'
+          }" 
+          [baseZIndex]="12000"
+        >
+                           <div class="messages-container">
+                            <div class="message-box">
+                              <textarea readonly rows="8" class="form-control custom-background">{{ messages[currentIndex] }}</textarea>
+                          </div>
+                          
+                          <div class="message-next-prev">
+                            <button type="button" class="btn btn-light previous-btn" (click)="previous()" translate>
+                              <span class="pi pi-angle-left"></span>
+                              Previous
+                            </button>
+                            <button type="button" class="btn btn-light next-btn" (click)="next()" translate>
+                              Next
+                              <span class="pi pi-angle-right"></span>
+                            </button>
+                          </div>
+                          
+                          <div class="close-button-container">
+                            <button type="button" class="btn btn-danger" (click)="close()" translate>
+                              Close
+                            </button>
+                          </div>
+                          </div>
+        </p-dialog>

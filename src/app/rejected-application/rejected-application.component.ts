@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { LoadingBarService } from '../loading-bar/loading-bar.service';
 import { ActivatedRoute } from '@angular/router';
 import { ServiceServiceService } from '../service-service.service';
@@ -16,18 +16,18 @@ import * as FileSaver from 'file-saver';
 
 // import * as ExcelJS from 'exceljs';
 @Component({
-  selector: 'app-application-status',
-  templateUrl: './application-status.component.html',
-  styleUrls: ['./application-status.component.css']
+  selector: 'app-rejected-application',
+  templateUrl: './rejected-application.component.html',
+  styleUrls: ['./rejected-application.component.css']
 })
-export class ApplicationStatusComponent implements OnInit {
-  
+export class RejectedApplicationComponent implements OnInit {
+  @Input() subcity:any
   Org: any;
   language: string;
   defaultZoomLevel: number = 0.54;
   Form: UserForm={} as UserForm;
   currentPage = 1;
-  pageSize = 1; // Number of items per page
+  pageSize = 5; // Number of items per page
   totalItems = 0; // Total number of items
   totalPages = 0; // Total number of pages
   pageRange: number[] = [];
@@ -47,7 +47,7 @@ currentIndex = 0;
 item: any = {};
   data: any;
   filterMeassage: any[];
-  subcity: any;
+  filtered: any;
 
 passAppNo(arg0: any) {
 throw new Error('Method not implemented.');
@@ -63,7 +63,11 @@ throw new Error('Method not implemented.');
     private captureService:NgxCaptureService
     ) {   }
   ngOnInit() {
+ 
+    console.log('subcity3',this.subcity);
+    
     this.Form.active=true
+    this.Form.subcity=this.subcity
      this.getOrganization()
   this.getorg()
   this.route.params.subscribe(params => {
@@ -75,7 +79,11 @@ throw new Error('Method not implemented.');
       }
     });
   }
-  
+  ngOnChanges(){
+    console.log('subcity2',this.subcity);
+    this.Form.subcity=this.subcity
+    this.getApplicatStatus()
+    }
   exportToPDF(): void {
     const element = document.getElementById('data-table');
 
@@ -308,30 +316,30 @@ previous() {
 
   
   passSubcity(values) {
-    this.subcity=values
-    console.log('subcity',values);
-    
-  }
+    this.Form.subcity=values}
   getApplicatStatus() {
+    console.log('subcity2',this.subcity);
     this.noRecord=true
-    this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(true);
+    // this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(true);
     if (this.Form.applictaion_Number==undefined) {
       this.Form.applictaion_Number=''
       
     }
     
-    this.service.getApplicationStatus(this.Form.applictaion_Number, this.Form.subcity).subscribe((response: any) => {
+    this.service.getApplicationStatus('app,'+this.Form.applictaion_Number, this.Form.subcity).subscribe((response: any) => {
       // this.data=response
-      this.users = this.groupRecordsByApplicationNumber(response.procviewStatusReports);
+      this.filtered=response.procviewStatusReports.
+      filter((value)=>value.status=='R  ')
+      this.users = this.groupRecordsByApplicationNumber(this.filtered);
       this.fitrstappno=this.users[0].applicationNumber
-      this.NumberofApp=response.procviewStatusReports.length
-      console.log('NumberofApp',response.procviewStatusReports.length);
+      this.NumberofApp=this.filtered.length
+      console.log('NumberofApp',this.filtered.length);
       this.totalPages = Math.ceil(this.users.length / this.pageSize);
       this.pageRange = Array.from({ length: this.totalPages }, (_, i) => i + 1); // Generate array from 1 to totalPages
       this.changePage(1);
       console.log('responseee', this.users[0].applicationNumber);
       this.noRecord=false
-      this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(false);
+      // this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(false);
     });
   }
   goToFirstPage() {

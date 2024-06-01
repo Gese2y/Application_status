@@ -1,57 +1,84 @@
 .task-column {
-    width: 2000px;
-    /* max-width: 2000px; */
+  width: 2000px;
+  /* max-width: 2000px; */
+}
+.date-column {
+  width: 500px;
+  /* max-width: 2000px; */
+}
+.custom-background {
+  background-color: lightblue;
+}
+
+.step-column {
+  width: 50px;
+}
+.pagination-button {
+  padding: 6px 12px;
+  margin-right: 4px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  cursor: pointer;
+}
+.pagination-container {
+  text-align: center;
+}
+
+.bordered-value {
+border: 1px solid #000; /* Border style */
+padding: 5px; /* Optional: Add padding for space inside the border */
+}
+
+.pagination-button:hover {
+  background-color: #ccc;
+}
+
+.pagination-button.active {
+  background-color: blue;
+  color: white;
+}
+.description {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+@media (max-width: 768px) {
+  /* Adjust the styles for small screens (up to 768px) */
+  #screen {
+    width: 90%;
+    margin: 10% auto;
   }
-  .step-column {
-    width: 50px;
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Adjust the styles for medium screens (769px - 1024px) */
+  #screen {
+    width: 80%;
+    margin: 7% auto;
   }
-  .pagination-button {
-    padding: 6px 12px;
-    margin-right: 4px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    color: #333;
-    cursor: pointer;
+}
+.message-next-prev {
+  display: flex;
+  justify-content: space-between;
+}
+
+.previous-btn {
+  margin-right: auto;
+}
+.close-button-container {
+  text-align: right;
+  margin-top: 10px; /* Adjust as needed */
+}
+
+.next-btn {
+  margin-left: auto;
+}
+
+@media (min-width: 1025px) {
+  /* Adjust the styles for large screens (1025px and above) */
+  #screen {
+    width: 60%;
+    margin: 5% auto;
   }
-  .pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .pagination-button:hover {
-    background-color: #ccc;
-  }
-  
-  .pagination-button.active {
-    background-color: blue;
-    color: white;
-  }
-  .description {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 5px;
-  }
-  @media (max-width: 768px) {
-    /* Adjust the styles for small screens (up to 768px) */
-    #screen {
-      width: 90%;
-      margin: 10% auto;
-    }
-  }
-  
-  @media (min-width: 769px) and (max-width: 1024px) {
-    /* Adjust the styles for medium screens (769px - 1024px) */
-    #screen {
-      width: 80%;
-      margin: 7% auto;
-    }
-  }
-  
-  @media (min-width: 1025px) {
-    /* Adjust the styles for large screens (1025px and above) */
-    #screen {
-      width: 60%;
-      margin: 5% auto;
-    }
-  }
+}

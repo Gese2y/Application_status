@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { LoadingBarService } from '../loading-bar/loading-bar.service';
 import { ActivatedRoute } from '@angular/router';
 import { ServiceServiceService } from '../service-service.service';
@@ -16,12 +16,13 @@ import * as FileSaver from 'file-saver';
 
 // import * as ExcelJS from 'exceljs';
 @Component({
-  selector: 'app-application-status',
-  templateUrl: './application-status.component.html',
-  styleUrls: ['./application-status.component.css']
+  selector: 'app-processed-application',
+  templateUrl: './processed-application.component.html',
+  styleUrls: ['./processed-application.component.css']
 })
-export class ApplicationStatusComponent implements OnInit {
-  
+export class ProcessedApplicationComponent implements OnInit {
+  @ViewChild('selectElement', { static: true }) selectElementRef: ElementRef;
+  @Output() SelectedOrg = new EventEmitter();
   Org: any;
   language: string;
   defaultZoomLevel: number = 0.54;
@@ -47,7 +48,13 @@ currentIndex = 0;
 item: any = {};
   data: any;
   filterMeassage: any[];
-  subcity: any;
+  selectBy: any;
+  checkAppOrg: any;
+  checkAppOrglength: any;
+  subPrefix: string;
+  dataLength: number;
+  isHere: boolean=true;
+  hideUserName: boolean;
 
 passAppNo(arg0: any) {
 throw new Error('Method not implemented.');
@@ -63,6 +70,10 @@ throw new Error('Method not implemented.');
     private captureService:NgxCaptureService
     ) {   }
   ngOnInit() {
+    this.selectElementRef.nativeElement.value = "app";
+
+    // Trigger the change event
+    this.selectElementRef.nativeElement.dispatchEvent(new Event('change'));
     this.Form.active=true
      this.getOrganization()
   this.getorg()
@@ -233,9 +244,14 @@ throw new Error('Method not implemented.');
   }
   
 
-
-
+  passSelectBy(event){
+    console.log('eventtttsss',event);
+    this.selectBy=event
+    this.Form.applictaion_Number=''
+  }
+ 
   getOrganization(){
+    // this.loadingBarService.loadingBarSubject = new BehaviorSubject<boolean>(true);
     this.service.getOrganization().subscribe((response:any)=>{
       this.organization=response.procorganizationss.filter((value)=>
         value.organization_code !='3d26a10c-9be9-4261-bf97-ab6f39455ed3'&&
@@ -243,7 +259,8 @@ throw new Error('Method not implemented.');
         // value.organization_code !='1efb0336-26c6-4bf1-aeb8-8da0d4f7dbbb'&&
         value.organization_code !='5ef1475c-2b66-4087-b1b7-63e6c6cd7ca1'&&
         value.organization_code !='1809e356-d00f-42f9-8425-41a149dfd60f');
-      console.log('response',this.organization);
+        // this.loadingBarService.loadingBarSubject = new BehaviorSubject<boolean>(false);
+      console.log('response',this.organization); 
     })
   }
 // Declare variables to store messages, usernames, and current index
@@ -308,9 +325,9 @@ previous() {
 
   
   passSubcity(values) {
-    this.subcity=values
-    console.log('subcity',values);
-    
+   
+    this.Form.subcity=values
+  console.log('subbb',this.Form.subcity);
   }
   getApplicatStatus() {
     this.noRecord=true
@@ -320,19 +337,90 @@ previous() {
       
     }
     
-    this.service.getApplicationStatus(this.Form.applictaion_Number, this.Form.subcity).subscribe((response: any) => {
-      // this.data=response
-      this.users = this.groupRecordsByApplicationNumber(response.procviewStatusReports);
-      this.fitrstappno=this.users[0].applicationNumber
-      this.NumberofApp=response.procviewStatusReports.length
-      console.log('NumberofApp',response.procviewStatusReports.length);
-      this.totalPages = Math.ceil(this.users.length / this.pageSize);
-      this.pageRange = Array.from({ length: this.totalPages }, (_, i) => i + 1); // Generate array from 1 to totalPages
-      this.changePage(1);
-      console.log('responseee', this.users[0].applicationNumber);
-      this.noRecord=false
-      this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(false);
+    this.service.getApplicationStatus( this.selectBy+','+this.Form.applictaion_Number, this.Form.subcity).subscribe((response: any) => {
+      this.data=response.procviewStatusReports
+      this.dataLength=this.data.length
+      if(this.data.length!==0){
+        this.isHere=true
+        this.users = this.groupRecordsByApplicationNumber(response.procviewStatusReports);
+        this.fitrstappno=this.users[0].applicationNumber
+        this.NumberofApp=this.users.length
+        this.totalPages = Math.ceil(this.users.length / this.pageSize);
+        this.pageRange = Array.from({ length: this.totalPages }, (_, i) => i + 1); // Generate array from 1 to totalPages
+        this.changePage(1);
+        console.log('responseee', this.users[0].applicationNumber);
+        this.noRecord=false
+        this.SelectedOrg.emit(this.Form.subcity)
+        this.loadingBarService.loadingBarSubject= new BehaviorSubject<boolean>(false);
+        console.log('NumberofApp',this.users,this.data);
+      }else{
+        this.isHere=true
+        if(this.Form.subcity=='6921d772-3a1c-4641-95a0-0ab320bac3e2'){
+          this.subPrefix='AR'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='f8ea62db-05bc-4f1a-ab30-4e926d43e3fb'){
+          this.subPrefix='NL'
+          console.log('subbbb',this.subPrefix);
+          
+        }
+        else if(this.Form.subcity=='6a8c042f-a3e1-4375-9769-54d94c2312c6'){
+          this.subPrefix='GU'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='89eb1aec-c875-4a08-aaf6-2c36c0864979'){
+          this.subPrefix='BL'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='7101d44d-97d5-41aa-957d-82f36d928c07'){
+          this.subPrefix='AD'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='e4d8219e-51f9-40cb-9d53-883c6ca9aaa3'){
+          this.subPrefix='LD'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='1efb0336-26c6-4bf1-aeb8-8da0d4f7dbbb'){
+          this.subPrefix='AACA'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='f02e9467-1b7d-4350-bee7-9844d4f56da0'){
+          this.subPrefix='LMK'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='8222f028-5fe3-4047-9a50-b52bfa64c851'){
+          this.subPrefix='YK'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='08f9c927-6366-467a-ba99-c837c5add427'){
+          this.subPrefix='AK'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='aaa5094c-8899-4708-9f7b-d8ff634a3540'){
+          this.subPrefix='KS'
+          console.log('subbbb',this.subPrefix);
+          
+        }else if(this.Form.subcity=='930d1c20-9e0e-4a50-9eb2-e542fafbad68'){
+          this.subPrefix='KK'
+          console.log('subbbb',this.subPrefix);
+          
+        }
+
+        this.service.getApplicationStatusCheckOrg(this.subPrefix+','+ this.Form.applictaion_Number).
+        subscribe((res:any)=>{
+          this.checkAppOrg=res.results
+          this.checkAppOrglength=res.results.length
+          console.log('NumberofApp',res.results        );
+          this.isHere=false
+        })
+      }
+     
     });
+  }
+  showMore(){
+    this.Form.subcity='1efb0336-26c6-4bf1-aeb8-8da0d4f7dbbb'
+    this.getApplicatStatus();
+    this.hideUserName=true
   }
   goToFirstPage() {
     if (this.currentPage !== 1) {
@@ -355,7 +443,8 @@ previous() {
       const servD = record.service_dilivery_point;
       const is_completed= record.is_completed;
       const application_Status=record.application_Status;
-      const key = `${applicationNumber}_${servName}_${servD}_${is_completed}_${application_Status}`;
+      const recordNo=record.recordNo;
+      const key = `${applicationNumber}_${servName}_${servD}_${is_completed}_${application_Status}_${recordNo}`;
   
       if (groupedMap.has(key)) {
         groupedMap.get(key).push(record);
@@ -365,16 +454,17 @@ previous() {
     }
   
     groupedMap.forEach((groupedRecordsArray, key) => {
-      const sortedRecords = groupedRecordsArray.sort((a, b) => a.step - b.step);
+      const sortedRecords = groupedRecordsArray;
   
-      const [applicationNumber, servName, servD,is_completed,application_Status] = key.split('_');
+      const [applicationNumber, servName, servD,is_completed,application_Status,recordNo] = key.split('_');
       const group = {
         applicationNumber: applicationNumber,
         servName: servName,
         servD: servD,
         records: sortedRecords,
         is_completed:is_completed,
-        application_Status:application_Status
+        application_Status:application_Status,
+        recordNo:recordNo,
 
       };
   
@@ -410,6 +500,7 @@ previous() {
     const startIndex = (page - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.paginatedUsers = this.users.slice(startIndex, endIndex);
+    
 console.log('this.paginatedUsers',this.paginatedUsers.length);
 
   

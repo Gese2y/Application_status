@@ -14,7 +14,7 @@ private woredaLookup =environment.rootPath + "Woreda_Lookup/procWoreda_Lookup/";
 private service_group =environment.rootPath + "Service_Group/procService_Group";
 
 private DocumentArc =environment.rootPath + "Document_Archive/procDocument_Archive";
-private orgdropdwn=environment.rootPath +"organizations/procorganizations";
+
 private Requirement_Documents= environment.rootpath2 + "getRequrementDocumentOfTasks";
 private save_Documentoftask = environment.rootpath2 + "SaveDocumentMaster";
 private Save_License_Service=environment.rootpath2+'saveLicenceServiceRecord'
@@ -34,11 +34,18 @@ environment.rootpath2 + "getRequrementDocumentOfTasks";
 private All_Service = 'http://197.156.93.110/XOKA.eoffice.bpel_Land/api/' + "BPEL/Service";
 private Task_Service = 'http://197.156.93.110/XOKA.eoffice.bpel_Land/api/' + "BPEL/getTasks";
 private  All_Org= environment.rootpath2 +"AllOrg"
+//  private  All_Org= "https://www.addisland.gov.et:444/XOKA.eoffice.bpel_land/api/BPEL/AllOrg"
+private orgdropdwn=environment.rootPath +"organizations/procorganizations";
+//  private orgdropdwn="https://www.addisland.gov.et:444/Xoka_land_API/api/organizations/procorganizations";
+//  public Application_status = "https://www.addisland.gov.et:444/Xoka_land_API/api/view/viewStatusReport/organization/";
+//  public Application_status = environment.rootPath + "view/viewStatusReport/organization/";
 public customerUrl = environment.rootPath + "Customer/procCustomer";
 public Username = environment.rootPath + "view/View_GetcustomerAllWithVitalId/";
 public CustomerId = environment.rootPath + "view/View_GetcustomerAllWithVitalId/Customer_ID/";
 public CustomerByColumn= environment.rootPath + "Customer/procCustomer/Column/"
-
+public Application_status= environment.rootPath + "viewStatusReportS/procviewStatusReport/"
+public Application_statusCheckOrg= environment.rootPath + "View_applicationorgforapi"
+public Postitnote= environment.rootPath + "view/View_postit_note_user/application_number"
 public QRcode= environment.rootPath + "QRCode/QRCode"
 public CustomerByColumn1= environment.rootPath + "Customer/procCustomer/Column/Column/CustomerLoadByTitledeedculumn/";
 private EthiopianToGregorian = environment.rootPath + "EthiopianToGregorian";
@@ -46,7 +53,6 @@ private gregorianToEthiopianDate =
 environment.rootPath + "gregorianToEthiopianDate";
 public DocByAppNo = environment.rootPath + "View_RecordAppNoAndDocIdByAppNo/procView_RecordAppNoAndDocIdByAppNo/";
 public DeedByAPP = environment.rootPath + "view/View_DeedRegstration/Application_No/";
-public Application_status = environment.rootPath + "view/viewStatusReport/organization/";
 public DeedByCustId = environment.rootPath + "view/View_DeedRegstration12/Customer_ID";
 public AppbyUserId = environment.rootPath + "ApplicationLoadByUserId/procApplicationLoadByUserId/";
 
@@ -98,6 +104,9 @@ private License_ServiceURL = environment.rootpath3 + "License_Service";
       );
     }
   }
+  getOrganization(){
+   return this.http.get(this.orgdropdwn)
+  }
   getgregorianToEthiopianDate(date) {
     if (date) {
       let year = parseInt(date.split("-")[0]);
@@ -138,7 +147,14 @@ private License_ServiceURL = environment.rootpath3 + "License_Service";
   }
   getApplicationStatus(AppNo,orgid){
     // http://197.156.93.110/Xoka_land_API/api/view/viewStatusReport/organization/921D772-3A1C-4641-95A0-0AB320BAC3E2?Application_No=AR-2722024-638446388268111713
-    return this.http.get(this.Application_status+orgid+'?Application_No='+AppNo)
+    return this.http.get(this.Application_status+orgid+'?ANo='+AppNo)
+  }
+  getApplicationStatusCheckOrg(AppNo){
+   return this.http.get(this.Application_statusCheckOrg+'/'+AppNo)
+  }
+  getPostitnote(AppNo,username){
+
+    return this.http.get(this.Postitnote+'?application_number='+AppNo)
   }
   getDeedByCustId(CustId){
     
